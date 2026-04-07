@@ -1,0 +1,7 @@
+.env
+storage_state.json
+seen_slots.txt
+debug.html
+debug.png
+*.pyc
+__pycache__/
