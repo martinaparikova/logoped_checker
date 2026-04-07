@@ -1,0 +1,51 @@
+name: logoped-check
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *"
+
+concurrency:
+  group: logoped-check
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TZ: Europe/Prague
+      ACTIVE_HOURS: "7-23"
+      EMAIL_SCREENSHOT: "1"
+
+      SS_URL: ${{ secrets.SS_URL }}
+      SS_LOGIN_URL: ${{ secrets.SS_LOGIN_URL }}
+      SS_USER: ${{ secrets.SS_USER }}
+      SS_PASS: ${{ secrets.SS_PASS }}
+
+      SMTP_HOST: ${{ secrets.SMTP_HOST }}
+      SMTP_PORT: ${{ secrets.SMTP_PORT }}
+      SMTP_USER: ${{ secrets.SMTP_USER }}
+      SMTP_PASS: ${{ secrets.SMTP_PASS }}
+      MAIL_TO: ${{ secrets.MAIL_TO }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Playwright (Chromium)
+        run: |
+          python -m playwright install --with-deps chromium
+
+      - name: Run checker
+        run: |
+          python check_logoped.py
